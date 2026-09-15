@@ -27,7 +27,6 @@ from app.models import (
     AdminRole,
     Business,
     BusinessBranch,
-    PaymentMethod,
     Staff,
     StaffLogin,
     StaffRole,
@@ -38,7 +37,9 @@ ADMIN_ROLE_NAMES = ("Super Admin", "General Admin", "Manager")
 STAFF_ROLE_NAMES = (
     "Super Admin (Staff)",
     "General Admin (Staff)",
-    "Manager (Staff)",
+    "HR Manager(Staff)",
+    "Finance Manager(Staff)",
+    "Other (Staff)",
 )
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")

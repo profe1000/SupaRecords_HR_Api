@@ -281,12 +281,12 @@ class BusinessImage(AuditMixin, Base):
     )
 
 
-class RoomMaintenanceLog(AuditMixin, Base):
-    __tablename__ = "room_maintenance_log"
+class Task(AuditMixin, Base):
+    __tablename__ = "task"
     assigned_staff_id: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    maintenance_type: Mapped[str] = mapped_column(
+    task_type: Mapped[str] = mapped_column(
         String(50), nullable=False
     )
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="OPEN")
