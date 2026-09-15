@@ -66,11 +66,11 @@ def seed_roles(db: Session, model: type[AdminRole], role_names: tuple[str, ...])
 def seed_business_and_branch(db: Session) -> BusinessBranch:
     business = (
         db.query(Business)
-        .filter(Business.business_name == "SupaRecords")
+        .filter(Business.business_name == "GlowPaints")
         .one_or_none()
     )
     if business is None:
-        business = Business(business_name="SupaRecords", status="ACTIVE")
+        business = Business(business_name="GlowPaints", status="ACTIVE")
         db.add(business)
         db.flush()
 
@@ -120,7 +120,7 @@ def seed_admin(db: Session, role: AdminRole) -> Admin:
 
 
 def seed_staff(db: Session, branch: BusinessBranch, role: StaffRole) -> Staff:
-    email = os.getenv("INITIAL_STAFF_EMAIL", "user@suparecords.local")
+    email = os.getenv("INITIAL_STAFF_EMAIL", "user@glowpaints.com")
     password = os.getenv("INITIAL_STAFF_PASSWORD", "Staff@123")
     staff = db.query(Staff).filter(Staff.email == email).one_or_none()
     if staff is None:
