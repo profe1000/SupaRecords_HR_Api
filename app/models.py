@@ -225,6 +225,31 @@ class StaffLogin(AuditMixin, Base):
     status: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
 
+class StaffOnboarding(AuditMixin, Base):
+    __tablename__ = "staff_onboarding"
+    __table_args__ = (UniqueConstraint("staff_id"),)
+
+    staff_id: Mapped[int] = mapped_column(ForeignKey("staff.id"), nullable=False)
+    personal_information: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    employment_information: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    emergency_contact: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    identification: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    bank_information: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    next_of_kin: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    skills_and_qualifications: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    family_background: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    references: Mapped[list[dict[str, Any]]] = mapped_column(JSON, nullable=False)
+    reference_verification: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    declaration: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    hr_use_only: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    onboarding_status: Mapped[str] = mapped_column(
+        String(50), nullable=False, default="DRAFT"
+    )
+    submitted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+
 class Business(AuditMixin, Base):
     """Top-level business account. Physical, operational detail lives on BusinessBranch."""
 

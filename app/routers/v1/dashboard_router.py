@@ -5,7 +5,6 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
-from app.models import Booking, BookingRoom, Guest, Room
 from app.schemas.v1.common import success_response
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])

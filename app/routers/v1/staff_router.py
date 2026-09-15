@@ -9,6 +9,11 @@ from app.core.pagination import ListQueryParams
 from app.core.security import decode_access_token
 from app.dependencies import get_db
 from app.schemas.v1.common import success_response
+from app.schemas.v1.onboarding import (
+    StaffOnboardingCreate,
+    StaffOnboardingRead,
+    StaffOnboardingUpdate,
+)
 from app.schemas.v1.staff import (
     StaffAuthResponse,
     StaffBranchRead,
@@ -19,10 +24,12 @@ from app.schemas.v1.staff import (
     StaffRoleRead,
 )
 from app.services.v1.staff_service import StaffService
+from app.services.v1.onboarding_service import OnboardingService
 
 
 router = APIRouter(prefix="/staffs", tags=["staffs"])
 service = StaffService()
+onboarding_service = OnboardingService()
 
 
 def resolve_staff_id_from_request(
@@ -145,6 +152,31 @@ def list_staff_by_branch(branch_id: int, params: ListQueryParams = Depends(), db
     items, meta = service.list_staff_by_branch(db, branch_id, params)
     data = [StaffRead.model_validate(item, from_attributes=True) for item in items]
     return success_response(data, message="Staff retrieved successfully", meta=meta)
+
+
+@router.post("/{staff_id}/onboarding", response_model=StaffOnboardingRead)
+def create_staff_onboarding(
+    staff_id: int,
+    payload: StaffOnboardingCreate,
+    db: Session = Depends(get_db),
+):
+    return onboarding_service.create(db, staff_id, payload)
+
+
+@router.get("/{staff_id}/onboarding")
+def get_staff_onboarding(staff_id: int, db: Session = Depends(get_db)):
+    onboarding = onboarding_service.get(db, staff_id)
+    data = StaffOnboardingRead.model_validate(onboarding)
+    return success_response(data, message="Staff onboarding form retrieved successfully")
+
+
+@router.put("/{staff_id}/onboarding", response_model=StaffOnboardingRead)
+def update_staff_onboarding(
+    staff_id: int,
+    payload: StaffOnboardingUpdate,
+    db: Session = Depends(get_db),
+):
+    return onboarding_service.update(db, staff_id, payload)
 
 
 @router.get("/{staff_id}")
