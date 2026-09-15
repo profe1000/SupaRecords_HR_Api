@@ -1,0 +1,13 @@
+fastapi==0.116.1
+SQLAlchemy==2.0.41
+alembic==1.16.4
+redis==6.2.0
+uvicorn==0.35.0
+psycopg[binary]==3.3.4
+python-dotenv==1.1.1
+bcrypt
+python-jose[cryptography]
+pydantic-settings
+email-validator
+httpx
+pusher
