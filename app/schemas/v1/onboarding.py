@@ -63,8 +63,8 @@ class SkillsAndQualifications(BaseModel):
     highest_qualification: str | None = Field(default=None, max_length=150)
     institution: str | None = Field(default=None, max_length=255)
     course_of_study: str | None = Field(default=None, max_length=255)
-    professional_certifications: list[str] = Field(default_factory=list)
-    skills: list[str] = Field(default_factory=list)
+    professional_certifications: list[str] | None = Field(default_factory=list)
+    skills: list[str] | None = Field(default_factory=list)
     years_of_experience: float | None = Field(default=None, ge=0)
 
 
@@ -76,8 +76,8 @@ class FamilyBackground(BaseModel):
     spouse_name: str | None = Field(default=None, max_length=255)
     spouse_occupation: str | None = Field(default=None, max_length=255)
     number_of_children: int | None = Field(default=None, ge=0)
-    children_names: list[str] = Field(default_factory=list)
-    other_dependants: list[str] = Field(default_factory=list)
+    children_names: list[str] | None = Field(default_factory=list)
+    other_dependants: list[str] | None = Field(default_factory=list)
     family_address: str | None = None
     family_contact_number: str | None = Field(default=None, max_length=50)
     additional_family_information: str | None = None
@@ -103,7 +103,7 @@ class ReferenceVerification(BaseModel):
 class DeclarationInformation(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    information_confirmed: bool = False
+    information_confirmed: bool | None = False
     employee_signature: str | None = None
     hr_officer: str | None = Field(default=None, max_length=255)
     declaration_date: date | None = Field(default=None, alias="date")

@@ -10,7 +10,6 @@ from app.core.security import decode_access_token
 from app.dependencies import get_db
 from app.schemas.v1.common import success_response
 from app.schemas.v1.onboarding import (
-    StaffOnboardingCreate,
     StaffOnboardingRead,
     StaffOnboardingUpdate,
 )
@@ -154,15 +153,6 @@ def list_staff_by_branch(branch_id: int, params: ListQueryParams = Depends(), db
     return success_response(data, message="Staff retrieved successfully", meta=meta)
 
 
-@router.post("/{staff_id}/onboarding", response_model=StaffOnboardingRead)
-def create_staff_onboarding(
-    staff_id: int,
-    payload: StaffOnboardingCreate,
-    db: Session = Depends(get_db),
-):
-    return onboarding_service.create(db, staff_id, payload)
-
-
 @router.get("/{staff_id}/onboarding")
 def get_staff_onboarding(staff_id: int, db: Session = Depends(get_db)):
     onboarding = onboarding_service.get(db, staff_id)
@@ -171,12 +161,12 @@ def get_staff_onboarding(staff_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{staff_id}/onboarding", response_model=StaffOnboardingRead)
-def update_staff_onboarding(
+def upsert_staff_onboarding(
     staff_id: int,
     payload: StaffOnboardingUpdate,
     db: Session = Depends(get_db),
 ):
-    return onboarding_service.update(db, staff_id, payload)
+    return onboarding_service.upsert(db, staff_id, payload)
 
 
 @router.get("/{staff_id}")
