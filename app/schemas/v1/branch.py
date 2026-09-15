@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class BranchBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    hotel_id: int
+    business_id: int
     branch_name: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
     email: Optional[str] = None
@@ -32,7 +32,7 @@ class BranchCreate(BranchBase):
 
 
 class BranchUpdate(BaseModel):
-    hotel_id: Optional[int] = None
+    business_id: Optional[int] = None
     branch_name: Optional[str] = Field(default=None, min_length=1, max_length=255)
     description: Optional[str] = None
     email: Optional[str] = None

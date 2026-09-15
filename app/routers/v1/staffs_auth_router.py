@@ -22,7 +22,7 @@ def register(payload: StaffRegister, db: Session = Depends(get_db)):
         payload.last_name,
         payload.email,
         payload.password,
-        payload.hotel_name,
+        payload.business_name,
     )
 
 

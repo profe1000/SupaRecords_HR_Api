@@ -1,7 +1,6 @@
-# supaRecords_Hotel_Management_addons__python_api
+# SupaRecords Business HR API
 
-Minimal FastAPI + SQLAlchemy + Alembic + Redis scaffold for the hotel booking
-database model described in the issue.
+FastAPI + SQLAlchemy + Alembic + Redis API for business HR management.
 
 ## Requirements
 

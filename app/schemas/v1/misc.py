@@ -6,5 +6,5 @@ class HealthResponse(BaseModel):
 
 
 class MetaResponse(BaseModel):
-    service: str = "hotel-management-api"
+    service: str = "business-hr-api"
     version: str = "v1"

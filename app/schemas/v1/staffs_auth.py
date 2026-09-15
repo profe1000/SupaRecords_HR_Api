@@ -11,7 +11,7 @@ class StaffRegister(BaseModel):
     last_name: str = Field(..., min_length=1, max_length=120)
     email: str
     password: str = Field(..., min_length=6)
-    hotel_name: str = Field(..., min_length=2, max_length=255)
+    business_name: str = Field(..., min_length=2, max_length=255)
 
 
 class StaffAuthResponse(BaseModel):

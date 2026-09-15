@@ -6,4 +6,4 @@ class MiscService:
         return {"status": "ok"}
 
     async def app_meta(self) -> Dict[str, Any]:
-        return {"service": "hotel-management-api", "version": "v1"}
+        return {"service": "business-hr-api", "version": "v1"}

@@ -190,7 +190,7 @@ class Staff(AuditMixin, Base):
     __tablename__ = "staff"
 
     branch_id: Mapped[int | None] = mapped_column(
-        ForeignKey("hotel_branch.id", use_alter=True), nullable=True
+        ForeignKey("business_branch.id", use_alter=True), nullable=True
     )
     first_name: Mapped[str] = mapped_column(String(120), nullable=False)
     last_name: Mapped[str] = mapped_column(String(120), nullable=False)
@@ -225,12 +225,12 @@ class StaffLogin(AuditMixin, Base):
     status: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
 
-class Hotel(AuditMixin, Base):
-    """Top-level brand / account. Physical, operational detail now lives on HotelBranch."""
+class Business(AuditMixin, Base):
+    """Top-level business account. Physical, operational detail lives on BusinessBranch."""
 
-    __tablename__ = "hotel"
+    __tablename__ = "business"
 
-    hotel_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    business_name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     phone_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
@@ -238,12 +238,12 @@ class Hotel(AuditMixin, Base):
     status: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
 
-class HotelBranch(AuditMixin, InventorySyncMixin, Base):
-    """A physical location belonging to a Hotel brand. All operational records key off branch_id."""
+class BusinessBranch(AuditMixin, InventorySyncMixin, Base):
+    """A physical location belonging to a business. Operational records key off branch_id."""
 
-    __tablename__ = "hotel_branch"
+    __tablename__ = "business_branch"
 
-    hotel_id: Mapped[int] = mapped_column(ForeignKey("hotel.id", use_alter=True), nullable=False)
+    business_id: Mapped[int] = mapped_column(ForeignKey("business.id", use_alter=True), nullable=False)
     branch_name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     email: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -261,7 +261,7 @@ class HotelBranch(AuditMixin, InventorySyncMixin, Base):
     currency: Mapped[str | None] = mapped_column(String(8), nullable=True)
     timezone: Mapped[str | None] = mapped_column(String(64), nullable=True)
     status: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    inventory_software_hotel__branch_id: Mapped[str | None] = mapped_column(
+    inventory_software_business_branch_id: Mapped[str | None] = mapped_column(
         String(255), nullable=True
     )
     inventory_software_api_key: Mapped[str | None] = mapped_column(
@@ -269,16 +269,29 @@ class HotelBranch(AuditMixin, InventorySyncMixin, Base):
     )
 
 
-class HotelImage(AuditMixin, Base):
-    __tablename__ = "hotel_image"
+class BusinessImage(AuditMixin, Base):
+    __tablename__ = "business_image"
 
     branch_id: Mapped[int] = mapped_column(
-        ForeignKey("hotel_branch.id"), nullable=False
+        ForeignKey("business_branch.id"), nullable=False
     )
     image_url: Mapped[str] = mapped_column(String(500), nullable=False)
     is_cover: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default=sa.text("false")
     )
+
+
+class RoomMaintenanceLog(AuditMixin, Base):
+    __tablename__ = "room_maintenance_log"
+    assigned_staff_id: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    maintenance_type: Mapped[str] = mapped_column(
+        String(50), nullable=False
+    )
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="OPEN")
+    priority: Mapped[str] = mapped_column(String(50), nullable=False, default="MEDIUM")
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class ActivityLog(AuditMixin, Base):
@@ -292,12 +305,12 @@ class ActivityLog(AuditMixin, Base):
     device: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
 
-class HotelSetting(AuditMixin, Base):
-    __tablename__ = "hotel_setting"
+class BusinessSetting(AuditMixin, Base):
+    __tablename__ = "business_setting"
     __table_args__ = (UniqueConstraint("branch_id"),)
 
     branch_id: Mapped[int] = mapped_column(
-        ForeignKey("hotel_branch.id"), nullable=False
+        ForeignKey("business_branch.id"), nullable=False
     )
     currency: Mapped[str | None] = mapped_column(String(8), nullable=True)
     timezone: Mapped[str | None] = mapped_column(String(64), nullable=True)

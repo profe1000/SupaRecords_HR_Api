@@ -1,4 +1,4 @@
-"""Seed initial roles, accounts, hotel, branch, and login history.
+"""Seed initial roles, accounts, business, branch, and login history.
 
 Usage:
     python scripts/seed.py
@@ -25,8 +25,8 @@ from app.models import (
     Admin,
     AdminLogin,
     AdminRole,
-    Hotel,
-    HotelBranch,
+    Business,
+    BusinessBranch,
     PaymentMethod,
     Staff,
     StaffLogin,
@@ -62,24 +62,28 @@ def seed_roles(db: Session, model: type[AdminRole], role_names: tuple[str, ...])
     return roles
 
 
-def seed_hotel_and_branch(db: Session) -> HotelBranch:
-    hotel = db.query(Hotel).filter(Hotel.hotel_name == "Dicas Hotel").one_or_none()
-    if hotel is None:
-        hotel = Hotel(hotel_name="Dicas Hotel", status="ACTIVE")
-        db.add(hotel)
+def seed_business_and_branch(db: Session) -> BusinessBranch:
+    business = (
+        db.query(Business)
+        .filter(Business.business_name == "SupaRecords")
+        .one_or_none()
+    )
+    if business is None:
+        business = Business(business_name="SupaRecords", status="ACTIVE")
+        db.add(business)
         db.flush()
 
     branch = (
-        db.query(HotelBranch)
+        db.query(BusinessBranch)
         .filter(
-            HotelBranch.hotel_id == hotel.id,
-            HotelBranch.branch_name == "Initial Branch HQ",
+            BusinessBranch.business_id == business.id,
+            BusinessBranch.branch_name == "Initial Branch HQ",
         )
         .one_or_none()
     )
     if branch is None:
-        branch = HotelBranch(
-            hotel_id=hotel.id,
+        branch = BusinessBranch(
+            business_id=business.id,
             branch_name="Initial Branch HQ",
             status="ACTIVE",
         )
@@ -89,7 +93,7 @@ def seed_hotel_and_branch(db: Session) -> HotelBranch:
 
 
 def seed_admin(db: Session, role: AdminRole) -> Admin:
-    email = os.getenv("INITIAL_ADMIN_EMAIL", "admin@dicas-hotel.local")
+    email = os.getenv("INITIAL_ADMIN_EMAIL", "admin@suparecords.local")
     username = os.getenv("INITIAL_ADMIN_USERNAME", "superadmin")
     password = os.getenv("INITIAL_ADMIN_PASSWORD", "Admin@123")
     admin = db.query(Admin).filter(Admin.email == email).one_or_none()
@@ -114,8 +118,8 @@ def seed_admin(db: Session, role: AdminRole) -> Admin:
     return admin
 
 
-def seed_staff(db: Session, branch: HotelBranch, role: StaffRole) -> Staff:
-    email = os.getenv("INITIAL_STAFF_EMAIL", "user@dicashotel.com")
+def seed_staff(db: Session, branch: BusinessBranch, role: StaffRole) -> Staff:
+    email = os.getenv("INITIAL_STAFF_EMAIL", "user@suparecords.local")
     password = os.getenv("INITIAL_STAFF_PASSWORD", "Staff@123")
     staff = db.query(Staff).filter(Staff.email == email).one_or_none()
     if staff is None:
@@ -164,12 +168,12 @@ def seed() -> None:
     try:
         admin_roles = seed_roles(db, AdminRole, ADMIN_ROLE_NAMES)
         staff_roles = seed_roles(db, StaffRole, STAFF_ROLE_NAMES)
-        branch = seed_hotel_and_branch(db)
+        branch = seed_business_and_branch(db)
         admin = seed_admin(db, admin_roles["Super Admin"])
         staff = seed_staff(db, branch, staff_roles["Super Admin (Staff)"])
         seed_initial_logins(db, admin, staff)
         db.commit()
-        print("Initial roles, accounts, hotel, branch, and login history seeded.")
+        print("Initial roles, accounts, business, branch, and login history seeded.")
     except Exception:
         db.rollback()
         raise

@@ -48,7 +48,7 @@ class StaffBranchRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    hotel_id: int
+    business_id: int
     branch_name: str
     description: str | None = None
     email: str | None = None
@@ -85,5 +85,5 @@ class StaffRegister(BaseModel):
     last_name: str = Field(..., min_length=1, max_length=120)
     email: str
     password: str = Field(..., min_length=6)
-    hotel_name: str = Field(..., min_length=2, max_length=255)
+    business_name: str = Field(..., min_length=2, max_length=255)
 StaffLogin = StaffLoginRequest

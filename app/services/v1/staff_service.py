@@ -7,7 +7,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Hotel, HotelBranch, Staff, StaffLogin, StaffRole
+from app.models import Business, BusinessBranch, Staff, StaffLogin, StaffRole
 from app.core.pagination import ListQueryParams, apply_search, apply_sorting, paginate
 from app.core.security import create_access_token, hash_password, verify_password
 from app.schemas.v1.staff import StaffCreate, StaffCreateResponse, StaffLoginRequest
@@ -15,22 +15,24 @@ from app.services.v1.email_service import send_welcome_email
 
 
 class StaffService:
-    def _get_or_create_hq_branch(self, db: Session, hotel_name: str) -> HotelBranch:
-        hotel = db.scalar(select(Hotel).where(Hotel.hotel_name == hotel_name))
-        if hotel is None:
-            hotel = Hotel(hotel_name=hotel_name, status="ACTIVE")
-            db.add(hotel)
+    def _get_or_create_hq_branch(self, db: Session, business_name: str) -> BusinessBranch:
+        business = db.scalar(
+            select(Business).where(Business.business_name == business_name)
+        )
+        if business is None:
+            business = Business(business_name=business_name, status="ACTIVE")
+            db.add(business)
             db.flush()
 
         branch = db.scalar(
-            select(HotelBranch).where(
-                HotelBranch.hotel_id == hotel.id,
-                HotelBranch.branch_name == "HQ Branch",
+            select(BusinessBranch).where(
+                BusinessBranch.business_id == business.id,
+                BusinessBranch.branch_name == "HQ Branch",
             )
         )
         if branch is None:
-            branch = HotelBranch(
-                hotel_id=hotel.id,
+            branch = BusinessBranch(
+                business_id=business.id,
                 branch_name="HQ Branch",
                 status="ACTIVE",
             )
@@ -38,8 +40,8 @@ class StaffService:
             db.flush()
         return branch
 
-    def _get_branch(self, db: Session, branch_id: int) -> HotelBranch:
-        branch = db.get(HotelBranch, branch_id)
+    def _get_branch(self, db: Session, branch_id: int) -> BusinessBranch:
+        branch = db.get(BusinessBranch, branch_id)
         if branch is None:
             raise HTTPException(status_code=404, detail="Branch not found")
         return branch
@@ -95,9 +97,9 @@ class StaffService:
         last_name: str,
         email: str,
         password: str,
-        hotel_name: str,
+        business_name: str,
     ):
-        branch = self._get_or_create_hq_branch(db, hotel_name)
+        branch = self._get_or_create_hq_branch(db, business_name)
         payload = StaffCreate(
             first_name=first_name,
             last_name=last_name,
@@ -126,7 +128,7 @@ class StaffService:
         if staff.branch_id is None:
             raise HTTPException(status_code=404, detail="Staff is not assigned to any branch")
 
-        branch = db.get(HotelBranch, staff.branch_id)
+        branch = db.get(BusinessBranch, staff.branch_id)
         if branch is None:
             raise HTTPException(status_code=404, detail="Branch not found")
         return branch
@@ -136,11 +138,11 @@ class StaffService:
         if staff.branch_id is None:
             return []
 
-        branch = db.get(HotelBranch, staff.branch_id)
+        branch = db.get(BusinessBranch, staff.branch_id)
         return [branch] if branch is not None else []
 
     def list_staff_by_branch(self, db: Session, branch_id: int, params: ListQueryParams):
-        branch = db.get(HotelBranch, branch_id)
+        branch = db.get(BusinessBranch, branch_id)
         if branch is None:
             raise HTTPException(status_code=404, detail="Branch not found")
         stmt = select(Staff).where(Staff.branch_id == branch_id)
