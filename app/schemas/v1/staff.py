@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
@@ -21,6 +21,50 @@ class StaffCreate(BaseModel):
     phone: str | None = Field(default=None, max_length=50)
     department: str | None = Field(default=None, max_length=100)
     staff_role_id: UUID | None = None
+    # Optional leave allowance, in calendar days, for `leave_year` (defaults to the current year).
+    leave_days: int | None = Field(default=None, ge=0, le=366)
+    leave_year: int | None = Field(default=None, ge=2000, le=2100)
+
+
+class StaffUpdate(BaseModel):
+    first_name: str | None = Field(default=None, min_length=1, max_length=120)
+    last_name: str | None = Field(default=None, min_length=1, max_length=120)
+    email: EmailStr | None = None
+    password: str | None = Field(default=None, min_length=6)
+    branch_id: int | None = None
+    phone: str | None = Field(default=None, max_length=50)
+    department: str | None = Field(default=None, max_length=100)
+    staff_role_id: UUID | None = None
+    status: Literal["ACTIVE", "INACTIVE", "SUSPENDED"] | None = None
+    leave_days: int | None = Field(default=None, ge=0, le=366)
+    leave_year: int | None = Field(default=None, ge=2000, le=2100)
+
+
+class StaffChangePassword(BaseModel):
+    current_password: str = Field(..., min_length=1)
+    new_password: str = Field(..., min_length=6, max_length=128)
+
+
+class StaffPasswordReset(BaseModel):
+    # Leave empty to have the system generate a temporary password.
+    new_password: str | None = Field(default=None, min_length=6, max_length=128)
+    send_email: bool = True
+
+
+class StaffPasswordResetResponse(BaseModel):
+    staff_id: int
+    # Returned once so the admin can pass it on if the email was not sent.
+    temporary_password: str
+    email_sent: bool
+    email_error: str | None = None
+
+
+class StaffPermissions(BaseModel):
+    is_manager: bool
+    # Super Admin / General Admin: whole business, branch filter, branch management.
+    can_filter_branches: bool
+    can_approve_leave: bool
+    can_approve_requests: bool
 
 
 class StaffRead(BaseModel):

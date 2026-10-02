@@ -207,6 +207,9 @@ class Staff(AuditMixin, Base):
     staff_role: Mapped[Optional["StaffRole"]] = relationship(
         "StaffRole", back_populates="staff", foreign_keys=[staff_role_id]
     )
+    branch: Mapped[Optional["BusinessBranch"]] = relationship(
+        "BusinessBranch", foreign_keys=[branch_id], viewonly=True
+    )
 
 
 class StaffLogin(AuditMixin, Base):
@@ -308,6 +311,7 @@ class BusinessImage(AuditMixin, Base):
 
 class Task(AuditMixin, Base):
     __tablename__ = "task"
+    branch_id: Mapped[int | None] = mapped_column(ForeignKey("business_branch.id"), nullable=True, index=True)
     assigned_staff_id: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -349,3 +353,84 @@ class BusinessSetting(AuditMixin, Base):
     allow_partial_payment: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default=sa.text("false")
     )
+
+
+class LeaveAllowance(AuditMixin, Base):
+    """Number of calendar leave days a staff member is entitled to in a given year."""
+
+    __tablename__ = "leave_allowance"
+    __table_args__ = (UniqueConstraint("staff_id", "year"),)
+
+    staff_id: Mapped[int] = mapped_column(ForeignKey("staff.id"), nullable=False, index=True)
+    year: Mapped[int] = mapped_column(Integer, nullable=False)
+    total_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
+class LeaveApplication(AuditMixin, Base):
+    __tablename__ = "leave_application"
+
+    staff_id: Mapped[int] = mapped_column(ForeignKey("staff.id"), nullable=False, index=True)
+    leave_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    start_date: Mapped[date] = mapped_column(Date, nullable=False)
+    end_date: Mapped[date] = mapped_column(Date, nullable=False)
+    days: Mapped[int] = mapped_column(Integer, nullable=False)
+    reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="PENDING")
+    reviewed_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    review_comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    staff: Mapped["Staff"] = relationship("Staff", foreign_keys=[staff_id])
+    reviewer: Mapped[Optional["Staff"]] = relationship("Staff", foreign_keys=[reviewed_by])
+
+
+class StaffRequest(AuditMixin, Base):
+    __tablename__ = "staff_request"
+
+    staff_id: Mapped[int] = mapped_column(ForeignKey("staff.id"), nullable=False, index=True)
+    request_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    amount: Mapped[Decimal | None] = mapped_column(Numeric(14, 2), nullable=True)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="PENDING")
+    reviewed_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    review_comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    staff: Mapped["Staff"] = relationship("Staff", foreign_keys=[staff_id])
+    reviewer: Mapped[Optional["Staff"]] = relationship("Staff", foreign_keys=[reviewed_by])
+
+
+class JobOpening(AuditMixin, Base):
+    __tablename__ = "job_opening"
+
+    business_id: Mapped[int] = mapped_column(ForeignKey("business.id"), nullable=False, index=True)
+    # Optional: a job can belong to one branch or to the whole business (NULL).
+    branch_id: Mapped[int | None] = mapped_column(ForeignKey("business_branch.id"), nullable=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    department: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    location: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    employment_type: Mapped[str] = mapped_column(String(50), nullable=False, default="FULL_TIME")
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    requirements: Mapped[str | None] = mapped_column(Text, nullable=True)
+    salary_range: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    closing_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    # DRAFT (hidden), OPEN (accepting applications on the careers page), CLOSED
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="DRAFT")
+
+
+class JobApplicant(AuditMixin, Base):
+    __tablename__ = "job_applicant"
+    __table_args__ = (UniqueConstraint("job_opening_id", "email"),)
+
+    job_opening_id: Mapped[int] = mapped_column(ForeignKey("job_opening.id"), nullable=False, index=True)
+    full_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[str] = mapped_column(String(255), nullable=False)
+    phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    cv_url: Mapped[str] = mapped_column(String(2048), nullable=False)
+    cover_letter: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # NEW, SHORTLISTED, INTERVIEW, OFFERED, HIRED, REJECTED
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="NEW")
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    job_opening: Mapped["JobOpening"] = relationship("JobOpening")

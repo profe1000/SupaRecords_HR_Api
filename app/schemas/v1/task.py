@@ -9,6 +9,8 @@ class TaskBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     assigned_staff_id: int | None = None
+    # Defaults to the assignee's branch (or the creator's) when not given.
+    branch_id: int | None = None
     title: str = Field(..., min_length=1, max_length=255)
     description: str | None = None
     task_type: str = Field(..., min_length=1, max_length=50)
@@ -22,6 +24,7 @@ class TaskCreate(TaskBase):
 
 class TaskUpdate(BaseModel):
     assigned_staff_id: int | None = None
+    branch_id: int | None = None
     title: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = None
     task_type: str | None = Field(default=None, min_length=1, max_length=50)
